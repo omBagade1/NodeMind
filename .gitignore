@@ -1,0 +1,67 @@
+# =========================
+# Dependencies
+# =========================
+node_modules/
+.pnp
+.pnp.js
+
+# =========================
+# Environment & Secrets
+# =========================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# =========================
+# Tests & Coverage
+# =========================
+tests/
+coverage/
+.nyc_output/
+
+# =========================
+# Docker & Containers
+# =========================
+.docker/
+docker-compose.override.yml
+*.dockerignore.tmp
+
+# =========================
+# Production & Build Outputs
+# =========================
+dist/
+build/
+out/
+.cache/
+
+# =========================
+# Logs & Diagnostics
+# =========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# IDEs & Code Editors
+# =========================
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# =========================
+# Operating System Files
+# =========================
+.DS_Store
+Thumbs.db
+desktop.ini
