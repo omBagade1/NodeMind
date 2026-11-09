@@ -106,3 +106,72 @@ export const listDirectoryTool = {
     return items.join('\n');
   },
 };
+
+export const searchCodebaseTool = {
+  definition: {
+    type: 'function',
+    function: {
+      name: 'search_codebase',
+      description:
+        'Search for a keyword or text pattern across files in the workspace. Returns matching file paths and line numbers.',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            description: 'The string or keyword to search for.',
+          },
+          directory: {
+            type: 'string',
+            description: 'Subdirectory to search in. Defaults to "." (entire workspace).',
+          },
+        },
+        required: ['query'],
+      },
+    },
+  },
+  execute: async ({ query, directory = '.' }) => {
+    const safeDir = await resolveSafePath(directory, 'read');
+    const results = [];
+    const maxResults = 25;
+
+    async function searchRecursively(currentPath) {
+      if (results.length >= maxResults) return;
+
+      const entries = await fs.readdir(currentPath, { withFileTypes: true });
+      for (const entry of entries) {
+        if (results.length >= maxResults) break;
+
+        const fullPath = path.join(currentPath, entry.name);
+        const relPath = path.relative(process.cwd(), fullPath);
+
+        if (entry.isDirectory()) {
+          if (['node_modules', '.git', 'dist', 'build', '.cache'].includes(entry.name)) {
+            continue;
+          }
+          await searchRecursively(fullPath);
+        } else if (entry.isFile()) {
+          try {
+            const content = await fs.readFile(fullPath, 'utf-8');
+            const lines = content.split('\n');
+            lines.forEach((line, index) => {
+              if (results.length < maxResults && line.toLowerCase().includes(query.toLowerCase())) {
+                results.push(`${relPath}:${index + 1}: ${line.trim()}`);
+              }
+            });
+          } catch {
+            // Skip unreadable/binary files
+          }
+        }
+      }
+    }
+
+    await searchRecursively(safeDir);
+
+    if (results.length === 0) {
+      return `No matches found for query "${query}".`;
+    }
+
+    return results.join('\n');
+  },
+};

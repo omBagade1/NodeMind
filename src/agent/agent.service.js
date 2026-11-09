@@ -61,10 +61,12 @@ export async function runAgent(prompt, options = {}) {
 
     // If no tools were called, the agent has reached its final answer!
     if (toolCalls.length === 0) {
+      const initialLength = 1 + history.length;
       return {
         reply: assistantMessage.content || '(No response text generated)',
         steps,
         iterations: iteration,
+        newMessages: messages.slice(initialLength),
       };
     }
 
@@ -104,10 +106,12 @@ export async function runAgent(prompt, options = {}) {
   }
 
   // If loop exhausted max iterations
+  const initialLength = 1 + history.length;
   return {
     reply: `Agent reached the maximum limit of ${maxIterations} iterations without completing.`,
     steps,
     iterations: maxIterations,
+    newMessages: messages.slice(initialLength),
     incomplete: true,
   };
 }
